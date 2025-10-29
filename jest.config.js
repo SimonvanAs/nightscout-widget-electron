@@ -4,7 +4,11 @@ const config = {
   clearMocks: true,
   collectCoverage: false,
   coverageDirectory: "coverage",
-  verbose: false
+  verbose: false,
+  transform: {
+    "^.+\\.js$": "babel-jest"
+  },
+  testEnvironment: "jsdom"
 };
 
 module.exports = config;

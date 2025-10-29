@@ -252,4 +252,4 @@ const getStatus = (testParams, onSuccess, onError) => {
   xhr.send();
 };
 
-export { getData, getStatus };
+export { getData, getStatus, obtainToken, hasTokenExpired, fallbackTransform };
