@@ -109,26 +109,77 @@ const hasTokenExpired = () => {
 };
 
 const obtainToken = (paramsObj) => {
-  log.info(`Requesting JWT token for the ${paramsObj.token}`);
-  const url = new URL(paramsObj.url + Endpoints.AUTH + `/` + paramsObj.token);
+  // Validate token before making request
+  if (!paramsObj.token) {
+    log.error(`Token is undefined or missing`);
+    return;
+  }
+  
+  // Validate token is a non-empty string
+  if (typeof paramsObj.token !== `string` || paramsObj.token.trim() === ``) {
+    log.error(`Token is invalid or empty`);
+    return;
+  }
+  
+  const maskedToken = paramsObj.token ? 
+    `${paramsObj.token.substring(0, 4)}...${paramsObj.token.substring(paramsObj.token.length - 4)}` : 
+    `***`;
+  log.info(`Requesting JWT token for the ${maskedToken}`);
+  
+  // Nightscout API v2 authorization endpoint requires token in URL path
+  // Format: /api/v2/authorization/request/{token}
+  // This is the initial authentication - the JWT token returned is used in headers for subsequent requests
+  const baseUrl = paramsObj.url.endsWith(`/`) ? paramsObj.url : `${paramsObj.url}/`;
+  const url = new URL(baseUrl + Endpoints.AUTH + `/` + paramsObj.token);
+  
+  // Use asynchronous request instead of blocking synchronous request
   const xhr = createRequest(
     `GET`,
     url,
-    (responseText) => {
-      const response = JSON.parse(responseText);
-      const expirationInMillis = response.exp * 1000;
+    (response) => {
+      try {
+        // Validate response exists
+        if (!response) {
+          throw new Error(`Invalid response: empty or null response`);
+        }
+        
+        // Validate required fields in response
+        if (!response.token) {
+          throw new Error(`Invalid response: token field missing`);
+        }
+        
+        if (typeof response.exp !== `number`) {
+          throw new Error(`Invalid response: expiration field missing or invalid`);
+        }
+        
+        const expirationInMillis = response.exp * 1000;
+        
+        // Validate token is not empty
+        if (typeof response.token !== `string` || response.token.trim() === ``) {
+          throw new Error(`Invalid response: token is empty or invalid`);
+        }
 
-      GetParams.TOKEN = response.token;
-      CONFIG.JWT_EXPIRATION = expirationInMillis;
+        GetParams.TOKEN = response.token;
+        CONFIG.JWT_EXPIRATION = expirationInMillis;
 
-      log.info(`JWT token obtained successfully`);
+        log.info(`JWT token obtained successfully`);
+      } catch (error) {
+        log.error(`Failed to process JWT token response: ${error.message}`);
+        // Clear invalid token to prevent further issues
+        GetParams.TOKEN = null;
+        CONFIG.JWT_EXPIRATION = 0;
+      }
     },
     (error) => {
-      log.error(`Failed to obtain JWT token ${error} for the ${paramsObj.token}`);
+      log.error(`Failed to obtain JWT token ${error} for the ${maskedToken}`);
+      // Clear token on error to prevent using invalid token
+      GetParams.TOKEN = null;
+      CONFIG.JWT_EXPIRATION = 0;
     },
-    false
+    true // Changed to async for better performance
   );
 
+  // No Authorization header needed - Nightscout API v2 uses token in URL path for this endpoint
   xhr.send();
 };
 
