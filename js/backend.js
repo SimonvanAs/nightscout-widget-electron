@@ -126,9 +126,11 @@ const obtainToken = (paramsObj) => {
     `***`;
   log.info(`Requesting JWT token for the ${maskedToken}`);
   
-  // Ensure proper URL construction with trailing slash handling
+  // Nightscout API v2 authorization endpoint requires token in URL path
+  // Format: /api/v2/authorization/request/{token}
+  // This is the initial authentication - the JWT token returned is used in headers for subsequent requests
   const baseUrl = paramsObj.url.endsWith(`/`) ? paramsObj.url : `${paramsObj.url}/`;
-  const url = new URL(baseUrl + Endpoints.AUTH);
+  const url = new URL(baseUrl + Endpoints.AUTH + `/` + paramsObj.token);
   
   // Use asynchronous request instead of blocking synchronous request
   const xhr = createRequest(
@@ -179,8 +181,7 @@ const obtainToken = (paramsObj) => {
     true // Changed to async for better performance
   );
 
-  // Send token in Authorization header
-  xhr.setRequestHeader(`Authorization`, `Bearer ${paramsObj.token}`);
+  // No Authorization header needed - Nightscout API v2 uses token in URL path for this endpoint
   xhr.send();
 };
 
