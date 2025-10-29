@@ -1,8 +1,10 @@
 const { app, BrowserWindow, powerMonitor, ipcMain, nativeTheme, shell, dialog } = require(`electron`);
 const path = require(`path`);
-const { readFileSync } = require(`fs`);
-const { exec } = require(`child_process`);
-const Store = require(`electron-store`);
+const { readFileSync, readFile } = require(`fs`);
+const { promisify } = require(`util`);
+
+const readFileAsync = promisify(readFile);
+const Store = require(`electron-store`).default;
 const Ajv = require(`ajv`);
 const log = require(`./js/logger`);
 const requestToUpdate = require(`./js/auto-update`);
@@ -78,7 +80,11 @@ const createWindow = () => {
     x: widgetBounds.x,
     y: widgetBounds.y,
     webPreferences: {
-      preload: path.join(__dirname, `js/preload.js`)
+      preload: path.join(__dirname, `js/preload.js`),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      enableRemoteModule: false
     },
     alwaysOnTop: true,
     frame: false,
@@ -111,7 +117,11 @@ const createWindow = () => {
     x: getPosition().x,
     y: getPosition().y,
     webPreferences: {
-      preload: path.join(__dirname, `js/preload.js`)
+      preload: path.join(__dirname, `js/preload.js`),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      enableRemoteModule: false
     },
     transparent: true,
     show: configValid ? false : true,
@@ -125,7 +135,7 @@ const createWindow = () => {
 
   settingsWindow.webContents.once(`ready-to-show`, () => {
     ipcMain.on(`check-validation`, () => {
-      if (!configValid) {
+      if (!configValid && validate.errors && validate.errors.length > 0) {
         const errorPath = validate.errors[0].instancePath.substring(1).replaceAll(`/`, `.`);
         const errorReason = validate.errors[0].message;
         const errorMessage = `Config invalid on: ${errorPath}\nReason: ${errorReason}`;
@@ -153,38 +163,44 @@ const createWindow = () => {
       "xdg-utils": `xdg-open`,
     };
 
-    const checkDependencies = async () => {
+    const checkDependencies = (() => {
+      let missingCounter = 0;
       const missingDependencies = [];
 
-      const dependencyChecks = Object.entries(linuxDependencies).map(async ([dependency, command]) => {
-        await new Promise((resolve, reject) => {
-          exec(`which ${command}`, (error) => {
-            if (error) {
-              log.error(`${dependency} is not installed on your system.`);
-              missingDependencies.push(dependency);
-              reject(error);
-            } else {
-              log.info(`${dependency} is installed.`);
-              resolve();
+      Object.entries(linuxDependencies).forEach(([package, command]) => {
+        // Lazy load child_process only when needed
+        const { spawn } = require(`child_process`);
+        const whichProcess = spawn(`which`, [command]);
+        
+        whichProcess.on(`close`, (code) => {
+          if (code !== 0) {
+            log.error(`${package} is not installed on your system.`);
+            missingDependencies.push(package);
+          } else {
+            log.info(`${package} is installed.`);
+          }
+
+          missingCounter++;
+
+          if (missingCounter === Object.keys(linuxDependencies).length) {
+            if (missingDependencies.length > 0) {
+              const errorMessage = `Please install the following dependencies:\n - ${missingDependencies.join(`\n - `)}`;
+              alert(`error`, `Missing dependencies`, errorMessage);
             }
-          });
+          }
         });
       });
-
-      await Promise.allSettled(dependencyChecks);
-
-      if (missingDependencies.length > 0) {
-        const errorMessage = `Please install the following dependencies:\n - ${missingDependencies.join(`\n - `)}`;
-        alert(`error`, `Missing dependencies`, errorMessage);
-      }
-    };
+    });
 
     mainWindow.webContents.on(`ready-to-show`, () => {
       checkDependencies();
-      exec(`wmctrl -r "${mainWindow.getTitle()}" -b add,skip_taskbar`, (error) => {
-        if (error) {
-          log.error(`Failed to execute wmctrl: ${error.message}`);
-        }
+      // Lazy load child_process only when needed
+      const { spawn } = require(`child_process`);
+      const title = mainWindow.getTitle();
+      const wmctrlProcess = spawn(`wmctrl`, [`-r`, title, `-b`, `add,skip_taskbar`]);
+      
+      wmctrlProcess.on(`error`, (error) => {
+        log.error(`Failed to execute wmctrl: ${error.message}`);
       });
     });
   }
@@ -354,9 +370,60 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle(`get-translate`, async (evt, language) => {
-
-    const translation = JSON.parse(readFileSync(path.join(__dirname, `localization/locales/${language}.json`)));
-    return translation;
+    try {
+      // Validate language parameter
+      if (!language || typeof language !== `string`) {
+        log.error(`Invalid language parameter provided`);
+        language = `en`; // Fallback to English
+      }
+      
+      const filePath = path.join(__dirname, `localization/locales/${language}.json`);
+      const data = await readFileAsync(filePath);
+      
+      // Validate data before parsing
+      if (!data || typeof data !== `string`) {
+        throw new Error(`Translation file is empty or invalid`);
+      }
+      
+      const translation = JSON.parse(data);
+      
+      // Validate parsed translation is an object
+      if (!translation || typeof translation !== `object`) {
+        throw new Error(`Translation file does not contain valid JSON object`);
+      }
+      
+      return translation;
+    } catch (err) {
+      log.error(`Failed to load translation for language ${language}:`, err.message || err);
+      
+      // Fallback to English if translation file not found or parsing fails
+      if ((err.code === `ENOENT` || err.name === `SyntaxError`) && language !== `en`) {
+        try {
+          const fallbackPath = path.join(__dirname, `localization/locales/en.json`);
+          const fallbackData = await readFileAsync(fallbackPath);
+          
+          if (!fallbackData || typeof fallbackData !== `string`) {
+            throw new Error(`Fallback translation file is empty`);
+          }
+          
+          const fallbackTranslation = JSON.parse(fallbackData);
+          
+          if (!fallbackTranslation || typeof fallbackTranslation !== `object`) {
+            throw new Error(`Fallback translation is invalid`);
+          }
+          
+          log.info(`Fallback to English translation for language ${language}`);
+          return fallbackTranslation;
+        } catch (fallbackErr) {
+          log.error(`Failed to load fallback English translation:`, fallbackErr.message || fallbackErr);
+          // Return empty object to prevent app crash
+          return {};
+        }
+      }
+      
+      // Return empty object for other errors to prevent app crash
+      return {};
+    }
   });
 
   ipcMain.on(`set-settings`, (evt, data) => {
