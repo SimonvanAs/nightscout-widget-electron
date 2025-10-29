@@ -114,12 +114,12 @@ jobs:
         with:
           name: ${{ runner.os }}-artifacts
           path: |
-            dist/*.AppImage
-            dist/*.deb
-            dist/*.dmg
-            dist/*.zip
-            dist/*.exe
-            dist/*.msi
+            dist/Owlet-*.AppImage
+            dist/Owlet-*.deb
+            dist/Owlet-*.dmg
+            dist/Owlet-*.zip
+            dist/Owlet-*.exe
+            dist/Owlet-*.msi
             dist/*.yml
             dist/*.blockmap
           if-no-files-found: warn
