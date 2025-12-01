@@ -27,13 +27,15 @@ readmeFiles.forEach((file) => {
 
     let hasOldVersion = false;
 
-    linksInFileArray.some((linkVersion) => {
-      if (linkVersion != process.env.npm_package_version) {
-        hasOldVersion = true;
-        countOldVersion++;
-      }
-      return hasOldVersion;
-    });
+    if (linksInFileArray) {
+      linksInFileArray.some((linkVersion) => {
+        if (linkVersion != process.env.npm_package_version) {
+          hasOldVersion = true;
+          countOldVersion++;
+        }
+        return hasOldVersion;
+      });
+    }
 
     if (hasOldVersion) {
       console.log(`${RED}${path.relative(process.cwd(), file)}${RESET} is outdated`);
