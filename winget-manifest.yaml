@@ -1,5 +1,5 @@
 PackageIdentifier: kashamalasha.Owlet
-PackageVersion: 0.8.2-beta
+PackageVersion: 0.8.3
 DefaultLocale: en-US
 Publisher: kashamalasha
 PackageName: Owlet
@@ -24,8 +24,8 @@ Description: Owlet is a cross-platform Electron widget application that displays
 Installers:
   - Type: zip
     Architecture: x64
-    InstallerUrl: https://github.com/kashamalasha/nightscout-widget-electron/releases/download/v0.8.2-beta/Owlet-v0.8.2-beta-win-x64.zip
-    InstallerSha256: 676316AFA755F84BAFD9EAFBA1267264E7C863A6180875DEB45E42A143719B6C
+    InstallerUrl: https://github.com/kashamalasha/nightscout-widget-electron/releases/download/v0.8.3/Owlet-0.8.3-win-x64.zip
+    InstallerSha256: TBD
     InstallModes:
       - silent
     Commands:
