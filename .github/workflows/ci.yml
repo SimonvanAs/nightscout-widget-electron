@@ -88,7 +88,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p dist
-          npx electron-builder --linux AppImage --publish never --config.publish=null
+          npx electron-builder --linux AppImage --publish never
           ls -la dist/ || echo "No dist files found"
 
       - name: Build (Windows)
@@ -97,7 +97,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if not exist dist mkdir dist
-          npx electron-builder --win nsis zip --publish never --config.publish=null
+          npx electron-builder --win nsis zip --publish never
           dir dist\ || echo "No dist files found"
 
       - name: Build (macOS)
@@ -112,7 +112,7 @@ jobs:
           # Build for both Apple Silicon and Intel (universal) per package.json config
           # Since notarize is false, this builds unsigned DMG
           # Override hardenedRuntime for CI unsigned builds
-          npx electron-builder --mac dmg zip --publish never --config.publish=null --config.mac.hardenedRuntime=false --config.mac.gatekeeperAssess=false
+          npx electron-builder --mac dmg zip --publish never --config.mac.hardenedRuntime=false --config.mac.gatekeeperAssess=false
           ls -la dist/ || echo "No dist files found"
 
       # ---- Upload artifacts from dist/ for download and testing ----
