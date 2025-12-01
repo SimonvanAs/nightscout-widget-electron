@@ -29,7 +29,7 @@ global.AbortController = class AbortController {
   }
 };
 
-describe('Backend Integration Tests', () => {
+describe(`Backend Integration Tests`, () => {
   let backendService;
   let mockLogger;
 
@@ -45,16 +45,16 @@ describe('Backend Integration Tests', () => {
 
     backendService = new BackendService({
       nightscout: {
-        url: 'https://example.com',
-        token: 'test-token-12345'
+        url: `https://example.com`,
+        token: `test-token-12345`
       },
       logger: mockLogger,
       fetchFn: global.fetch
     });
   });
 
-  describe('BackendService.getData', () => {
-    it('should successfully fetch data from API v3', async () => {
+  describe(`BackendService.getData`, () => {
+    it(`should successfully fetch data from API v3`, async () => {
       const mockData = {
         result: [
           { sgv: 120, direction: 'Flat', date: Date.now() },
@@ -87,7 +87,7 @@ describe('Backend Integration Tests', () => {
       expect(onError).not.toHaveBeenCalled();
     });
 
-    it('should fallback to API v2 on 403 error', async () => {
+    it(`should fallback to API v2 on 403 error`, async () => {
       const mockV2Data = [
         { sgv: 120, direction: 'Flat', mills: Date.now() },
         { sgv: 115, direction: 'FortyFiveUp', mills: Date.now() - 300000 }
@@ -126,7 +126,7 @@ describe('Backend Integration Tests', () => {
       expect(onError).not.toHaveBeenCalled();
     });
 
-    it('should handle network errors', async () => {
+    it(`should handle network errors`, async () => {
       // Mock token response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -148,7 +148,7 @@ describe('Backend Integration Tests', () => {
       expect(onError).toHaveBeenCalled();
     });
 
-    it('should handle timeout errors', async () => {
+    it(`should handle timeout errors`, async () => {
       // Mock token response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -180,8 +180,8 @@ describe('Backend Integration Tests', () => {
     });
   });
 
-  describe('BackendService.getStatus', () => {
-    it('should successfully test connection', async () => {
+  describe(`BackendService.getStatus`, () => {
+    it(`should successfully test connection`, async () => {
       // Mock token response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -215,7 +215,7 @@ describe('Backend Integration Tests', () => {
       expect(onError).not.toHaveBeenCalled();
     });
 
-    it('should handle 404 errors', async () => {
+    it(`should handle 404 errors`, async () => {
       // Mock token response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -247,8 +247,8 @@ describe('Backend Integration Tests', () => {
     });
   });
 
-  describe('TokenService', () => {
-    it('should obtain token before making request if token is missing', async () => {
+  describe(`TokenService`, () => {
+    it(`should obtain token before making request if token is missing`, async () => {
       const tokenService = new TokenService({
         nightscout: {
           url: 'https://example.com',
@@ -274,7 +274,7 @@ describe('Backend Integration Tests', () => {
       expect(token).toBe('jwt-token-abc123');
     });
 
-    it('should cache token until expiration', async () => {
+    it(`should cache token until expiration`, async () => {
       const tokenService = new TokenService({
         nightscout: {
           url: 'https://example.com',

@@ -140,6 +140,7 @@ export default [
         beforeAll: 'readonly',
         afterAll: 'readonly',
         jest: 'readonly',
+        global: 'writable',
         // Browser globals for tests
         FormData: 'readonly',
         window: 'readonly',
