@@ -34,9 +34,7 @@
       "asset/**/*",
       "!asset/screenshot*"
     ],
-    "extraFiles": [
-      "LICENSE"
-    ],
+    "extraFiles": [],
     "mac": {
       "notarize": false,
       "hardenedRuntime": true,
