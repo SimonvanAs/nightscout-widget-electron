@@ -22,7 +22,7 @@ describe(`alert`, () => {
   const mockShowMessageBoxSync = jest.fn();
 
   beforeEach(() => {
-    global.electronAPI = { // eslint-disable-line
+    global.electronAPI = {
       dialog: {
         showMessageBox: mockShowMessageBox,
         showMessageBoxSync: mockShowMessageBoxSync,
@@ -34,7 +34,7 @@ describe(`alert`, () => {
     mockShowMessageBox.mockClear();
     mockShowMessageBoxSync.mockClear();
 
-    delete global.electronAPI; // eslint-disable-line
+    delete global.electronAPI;
   });
 
   it(`should call showMessageBox for asynchronous alert`, async () => {

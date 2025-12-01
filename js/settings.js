@@ -135,8 +135,6 @@ const nightscoutTextInputs = [
   FormFields.NIGHTSCOUT.TOKEN
 ];
 
-import { validateUrl } from "./security.js";
-
 const trimInputs = (evt) => {
   const inputValue = evt.target.value;
   const trimmedValue = inputValue.trim();

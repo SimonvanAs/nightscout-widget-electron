@@ -153,7 +153,7 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          token: 'jwt-token-abc123',
+          token: `jwt-token-abc123`,
           exp: Math.floor(Date.now() / 1000) + 3600
         })
       });
@@ -161,9 +161,9 @@ describe(`Backend Integration Tests`, () => {
       // Simulate timeout
       global.fetch.mockImplementationOnce(() => {
         return new Promise((_, reject) => {
-          setTimeout(() => {
-            const error = new Error('Request timeout');
-            error.name = 'AbortError';
+          global.setTimeout(() => {
+            const error = new Error(`Request timeout`);
+            error.name = `AbortError`;
             reject(error);
           }, 100);
         });
@@ -176,7 +176,7 @@ describe(`Backend Integration Tests`, () => {
 
       expect(onSuccess).not.toHaveBeenCalled();
       expect(onError).toHaveBeenCalled();
-      expect(onError.mock.calls[0][0]).toContain('timeout');
+      expect(onError.mock.calls[0][0]).toContain(`timeout`);
     });
   });
 
@@ -186,14 +186,14 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          token: 'jwt-token-abc123',
+          token: `jwt-token-abc123`,
           exp: Math.floor(Date.now() / 1000) + 3600
         })
       });
 
       const mockStatus = {
-        status: 'ok',
-        version: '1.0.0'
+        status: `ok`,
+        version: `1.0.0`
       };
 
       global.fetch.mockResolvedValueOnce({
@@ -205,7 +205,7 @@ describe(`Backend Integration Tests`, () => {
       const onError = jest.fn();
 
       await backendService.getStatus(
-        { url: 'https://example.com', token: 'test-token' },
+        { url: `https://example.com`, token: `test-token` },
         onSuccess,
         onError
       );
@@ -220,7 +220,7 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          token: 'jwt-token-abc123',
+          token: `jwt-token-abc123`,
           exp: Math.floor(Date.now() / 1000) + 3600
         })
       });
@@ -228,22 +228,22 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: false,
         status: 404,
-        statusText: 'Not Found',
-        json: async () => ({ message: 'Not Found' })
+        statusText: `Not Found`,
+        json: async () => ({ message: `Not Found` })
       });
 
       const onSuccess = jest.fn();
       const onError = jest.fn();
 
       await backendService.getStatus(
-        { url: 'https://example.com', token: 'test-token' },
+        { url: `https://example.com`, token: `test-token` },
         onSuccess,
         onError
       );
 
       expect(onSuccess).not.toHaveBeenCalled();
       expect(onError).toHaveBeenCalled();
-      expect(onError.mock.calls[0][0]).toContain('404');
+      expect(onError.mock.calls[0][0]).toContain(`404`);
     });
   });
 
@@ -251,15 +251,15 @@ describe(`Backend Integration Tests`, () => {
     it(`should obtain token before making request if token is missing`, async () => {
       const tokenService = new TokenService({
         nightscout: {
-          url: 'https://example.com',
-          token: 'test-token-12345'
+          url: `https://example.com`,
+          token: `test-token-12345`
         },
         logger: mockLogger,
         fetchFn: global.fetch
       });
 
       const mockTokenResponse = {
-        token: 'jwt-token-abc123',
+        token: `jwt-token-abc123`,
         exp: Math.floor(Date.now() / 1000) + 3600
       };
 
@@ -271,21 +271,21 @@ describe(`Backend Integration Tests`, () => {
       const token = await tokenService.getToken();
 
       expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(token).toBe('jwt-token-abc123');
+      expect(token).toBe(`jwt-token-abc123`);
     });
 
     it(`should cache token until expiration`, async () => {
       const tokenService = new TokenService({
         nightscout: {
-          url: 'https://example.com',
-          token: 'test-token-12345'
+          url: `https://example.com`,
+          token: `test-token-12345`
         },
         logger: mockLogger,
         fetchFn: global.fetch
       });
 
       const mockTokenResponse = {
-        token: 'jwt-token-abc123',
+        token: `jwt-token-abc123`,
         exp: Math.floor(Date.now() / 1000) + 3600
       };
 
