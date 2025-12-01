@@ -1,8 +1,15 @@
 "use strict";
 
+/**
+ * Settings module for application configuration
+ * @module settings
+ */
+
 import { customAssign, alert, convertUnitsFor, formDataToObject } from "./util.js";
 import { getStatus } from "./backend.js";
 import { Translator } from "./translator.js";
+import { validateUrl, validateToken } from "./security.js";
+import { ErrorHandler, ErrorType, ErrorCode } from "./errors.js";
 
 const LANGUAGE = await window.electronAPI.getLanguage();
 const CONFIG = await window.electronAPI.getSettings();
@@ -59,7 +66,7 @@ document.querySelector(`#app-version`).textContent = VERSION;
 FormFields.WIDGET.SHOW_AGE.addEventListener(`change`, (evt) => {
   const show = evt.target.checked;
   try {
-    window.electronAPI.testAgeVisisblity(show);
+    window.electronAPI.testAgeVisibility(show);
   } catch (error) {
     log.error(error);
   }
@@ -117,7 +124,9 @@ FormButtons.TEST.addEventListener(`click`, async (evt) => {
   try {
     await testConnection(evt);
   } catch (error) {
-    alert(`error`, `Connection failed.`, error);
+    const appError = ErrorHandler.handle(error, ErrorType.NETWORK);
+    alert(`error`, `Connection failed.`, appError.toUserMessage());
+    log.error(appError.toLogMessage());
   }
 });
 
@@ -125,6 +134,8 @@ const nightscoutTextInputs = [
   FormFields.NIGHTSCOUT.URL,
   FormFields.NIGHTSCOUT.TOKEN
 ];
+
+import { validateUrl } from "./security.js";
 
 const trimInputs = (evt) => {
   const inputValue = evt.target.value;
@@ -134,8 +145,45 @@ const trimInputs = (evt) => {
   evt.target.value = modifiedValue;
 };
 
+const validateInputs = (evt) => {
+  const input = evt.target;
+  const value = input.value.trim();
+
+  // Validate URL input
+  if (input.id === `nightscout-url`) {
+    if (value !== ``) {
+      const urlValidation = validateUrl(value);
+      if (!urlValidation.valid) {
+        input.setCustomValidity(urlValidation.error || `Invalid URL format`);
+        input.reportValidity();
+        return;
+      }
+    }
+  }
+
+  // Validate token input
+  if (input.id === `nightscout-token`) {
+    if (value !== ``) {
+      const tokenValidation = validateToken(value);
+      if (!tokenValidation.valid) {
+        input.setCustomValidity(tokenValidation.error || `Invalid token format`);
+        input.reportValidity();
+        return;
+      }
+    }
+  }
+
+  // Clear any previous validation errors
+  input.setCustomValidity(``);
+};
+
 nightscoutTextInputs.forEach((input) => {
   input.addEventListener(`blur`, trimInputs);
+  input.addEventListener(`blur`, validateInputs);
+  input.addEventListener(`input`, () => {
+    // Clear validation error on input
+    input.setCustomValidity(``);
+  });
 });
 
 const formSubmission = (formDataObj) => {
@@ -163,15 +211,16 @@ window.electronAPI.setUnits((_evt, isMMOL) => {
 form.addEventListener(`submit`, async (evt) => {
   evt.preventDefault();
 
-  const formData = new FormData(evt.target);
-  const formDataObj = formDataToObject(formData);
-
   try {
+    const formData = new FormData(evt.target);
+    const formDataObj = formDataToObject(formData);
+
     await testConnection(evt);
     formSubmission(formDataObj);
   } catch (error) {
-    log.error(error);
-    alert(`error`, `Error`, `Something went wrong`, true);
+    const appError = ErrorHandler.handle(error, ErrorType.UNKNOWN);
+    log.error(appError.toLogMessage());
+    alert(`error`, `Error`, appError.toUserMessage(), true);
   }
 });
 

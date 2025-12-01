@@ -1,10 +1,15 @@
 "use strict";
 
+/**
+ * Widget module for displaying Nightscout glucose data
+ * @module widget
+ */
+
 import { getData } from "./backend.js";
 import { prepareData, alert, convertUnitsFor } from "./util.js";
+import { CONNECTION_RETRY_LIMIT, DATA_AGE_SHOW_LIMIT, MILLISECONDS_PER_SECOND } from "./constants.js";
+import { ErrorHandler, ErrorType, ErrorCode } from "./errors.js";
 
-const CONNECTION_RETRY_LIMIT = 5;
-const DATA_AGE_SHOW_LIMIT = 999;
 const CONFIG = await window.electronAPI.getSettings();
 
 const log = window.electronAPI.logger;
@@ -126,51 +131,97 @@ const onSuccess = (result) => {
 };
 
 const onError = (errorMessage) => {
-  const msg = `${errorMessage} - was encountered over than ${retry++} times`;
+  // Handle error with standardized error handling
+  const error = ErrorHandler.handle(errorMessage, ErrorType.NETWORK, ErrorCode.NETWORK_SERVER_ERROR);
+  const userMessage = error.toUserMessage();
+  const logMessage = error.toLogMessage();
+
+  const msg = `${userMessage} - encountered ${retry++} times`;
 
   if (retry > CONNECTION_RETRY_LIMIT && !isAlertShown) {
-    log.error(msg);
+    log.error(logMessage);
     Fields.sgv.classList.add(`sgv--frozen`);
     Fields.last.className = Fields.last.className.replace(
       /sgv__last--.*/,
       ModMap.default,
     );
-    alert(`error`, `Connection error`, msg);
+    alert(`error`, `Connection error`, userMessage);
     isAlertShown = true;
   }
 };
 
 window.electronAPI.setUnits((_evt, isMMOL) => {
-  log.info(`Test of displaying units in mmol/l: ${isMMOL} from mainWindow`);
+  try {
+    log.info(`Test of displaying units in mmol/l: ${isMMOL} from mainWindow`);
 
-  convertUnitsFor(CONFIG.BG, isMMOL);
+    convertUnitsFor(CONFIG.BG, isMMOL);
 
-  const onSuccessSwitch = (result) => {
-    render(prepareData(result, { units_in_mmol: isMMOL }));
-  };
+    const onSuccessSwitch = (result) => {
+      render(prepareData(result, { units_in_mmol: isMMOL }));
+    };
 
-  getData(onSuccessSwitch, onError);
+    getData(onSuccessSwitch, onError);
+  } catch (error) {
+    const appError = ErrorHandler.handle(error, ErrorType.UNKNOWN);
+    log.error(appError.toLogMessage());
+    alert(`error`, `Error`, appError.toUserMessage());
+  }
 });
 
 window.electronAPI.setCalcTrend((_evt, calcTrend, isMMOL) => {
-  log.info(`Test trend calculation: ${calcTrend}`);
+  try {
+    log.info(`Test trend calculation: ${calcTrend}`);
 
-  const onSuccessSwitch = (result) => {
-    render(prepareData(result, { units_in_mmol: isMMOL, calc_trend: calcTrend }));
-  };
+    const onSuccessSwitch = (result) => {
+      render(prepareData(result, { units_in_mmol: isMMOL, calc_trend: calcTrend }));
+    };
 
-  getData(onSuccessSwitch, onError);
+    getData(onSuccessSwitch, onError);
+  } catch (error) {
+    const appError = ErrorHandler.handle(error, ErrorType.UNKNOWN);
+    log.error(appError.toLogMessage());
+    alert(`error`, `Error`, appError.toUserMessage());
+  }
 });
 
 document.addEventListener(`visibilitychange`, () => {
   if (document.visibilityState === `visible`) {
-    getData(onSuccess, onError);
-    log.info(`Get data due to visibility change`);
+    try {
+      getData(onSuccess, onError);
+      log.info(`Get data due to visibility change`);
+    } catch (error) {
+      const appError = ErrorHandler.handle(error, ErrorType.UNKNOWN);
+      log.error(appError.toLogMessage());
+    }
   }
 });
 
-setInterval(() => {
-  getData(onSuccess, onError);
-}, CONFIG.NIGHTSCOUT.INTERVAL * 1000);
+// Store interval ID for cleanup
+let dataIntervalId = null;
 
-getData(onSuccess, onError);
+// Initialize data fetching
+const initializeDataFetching = () => {
+  // Clear any existing interval
+  if (dataIntervalId !== null) {
+    clearInterval(dataIntervalId);
+  }
+
+  // Set up interval for periodic data fetching
+  dataIntervalId = setInterval(() => {
+    getData(onSuccess, onError);
+  }, CONFIG.NIGHTSCOUT.INTERVAL * MILLISECONDS_PER_SECOND);
+
+  // Initial data fetch
+  getData(onSuccess, onError);
+};
+
+// Cleanup on page unload
+window.addEventListener(`beforeunload`, () => {
+  if (dataIntervalId !== null) {
+    clearInterval(dataIntervalId);
+    dataIntervalId = null;
+  }
+});
+
+// Initialize
+initializeDataFetching();

@@ -1,5 +1,7 @@
 "use strict";
 
+import { MMOL_TO_MGDL_RATE, MIN_DATA_CALC_LENGTH, SENSOR_READ_INTERVAL_IN_MIN, MILLISECONDS_PER_SECOND, SECONDS_PER_MINUTE } from "./constants.js";
+
 const dir2Char = {
   NONE: `⇼`,
   TripleUp: `⤊`,
@@ -15,7 +17,7 @@ const dir2Char = {
   "RATE OUT OF RANGE": `⇕`
 };
 
-const MMOL_TO_MGDL_RATE = 18;
+// MMOL_TO_MGDL_RATE imported from constants.js
 
 const customAssign = (targetObject, patchObject) => {
 
@@ -74,9 +76,7 @@ const directionToChar = (direction) => {
 };
 
 const calcTrend = (data) => {
-
-  const MIN_DATA_CALC_LENGTH = 6;
-  const SENSOR_READ_INTERVAL_IN_MIN = 5;
+  // Constants imported from constants.js
 
   if (!Array.isArray(data) ||
       data.length < MIN_DATA_CALC_LENGTH ||
@@ -122,7 +122,7 @@ const prepareData = (dataObj, paramsObj) => {
   result.prev = dataObj.result[1].sgv;
 
   const currentTime = new Date();
-  result.age = Math.floor((currentTime.getTime() - dataObj.result[0].date) / 1000 / 60);
+  result.age = Math.floor((currentTime.getTime() - dataObj.result[0].date) / MILLISECONDS_PER_SECOND / SECONDS_PER_MINUTE);
 
   let delta = Math.round((result.last - result.prev) * 100) / 100;
 

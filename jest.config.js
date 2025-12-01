@@ -4,11 +4,17 @@ const config = {
   clearMocks: true,
   collectCoverage: false,
   coverageDirectory: "coverage",
-  verbose: false,
-  transform: {
-    "^.+\\.js$": "babel-jest"
+  verbose: true,
+  testEnvironment: "jsdom",
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
-  testEnvironment: "jsdom"
+  transform: {
+    '^.+\\.js$': 'babel-jest'
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))'
+  ]
 };
 
 module.exports = config;
