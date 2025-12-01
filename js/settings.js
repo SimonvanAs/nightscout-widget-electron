@@ -9,7 +9,7 @@ import { customAssign, alert, convertUnitsFor, formDataToObject } from "./util.j
 import { getStatus } from "./backend.js";
 import { Translator } from "./translator.js";
 import { validateUrl, validateToken } from "./security.js";
-import { ErrorHandler, ErrorType, ErrorCode } from "./errors.js";
+import { ErrorHandler, ErrorType } from "./errors.js";
 
 const LANGUAGE = await window.electronAPI.getLanguage();
 const CONFIG = await window.electronAPI.getSettings();
