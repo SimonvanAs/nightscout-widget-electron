@@ -136,8 +136,6 @@ const onError = (errorMessage) => {
   const userMessage = error.toUserMessage();
   const logMessage = error.toLogMessage();
 
-  const msg = `${userMessage} - encountered ${retry++} times`;
-
   if (retry > CONNECTION_RETRY_LIMIT && !isAlertShown) {
     log.error(logMessage);
     Fields.sgv.classList.add(`sgv--frozen`);

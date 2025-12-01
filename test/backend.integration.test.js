@@ -10,7 +10,6 @@
 
 import { BackendService } from '../js/services/BackendService.js';
 import { TokenService } from '../js/services/TokenService.js';
-import { DataService } from '../js/services/DataService.js';
 
 // Mock fetch globally
 global.fetch = jest.fn();

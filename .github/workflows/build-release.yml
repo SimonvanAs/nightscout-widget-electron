@@ -6,12 +6,13 @@ on:
       - main
     types:
       - closed
+  workflow_dispatch:
 
 jobs:
 
   build-macos:
     runs-on: macos-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     env:
       CERTIFICATE: ${{ secrets.PROD_MACOS_CERTIFICATE }}
       CERTIFICATE_PWD: ${{ secrets.PROD_MACOS_CERTIFICATE_PWD }}
@@ -76,7 +77,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code
@@ -100,7 +101,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code

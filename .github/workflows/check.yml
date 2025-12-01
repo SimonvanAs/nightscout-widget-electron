@@ -12,6 +12,7 @@ on:
     types:
       - opened
       - synchronize
+  workflow_dispatch:
 
 # Lightweight checks that run quickly without building
 # Full build tests run in ci.yml workflow

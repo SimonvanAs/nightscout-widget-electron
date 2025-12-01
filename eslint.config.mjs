@@ -70,7 +70,9 @@ export default [
         Error: 'readonly',
         RegExp: 'readonly',
         // Browser globals
-        FormData: 'readonly'
+        FormData: 'readonly',
+        fetch: 'readonly',
+        AbortController: 'readonly'
       }
     },
     plugins: {

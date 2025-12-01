@@ -6,7 +6,7 @@
  */
 
 import { maskToken, validateToken, validateUrl, validateTokenResponse, constructSecureUrl } from "./security.js";
-import { REQUEST_TIMEOUT_MS, MILLISECONDS_PER_SECOND, TOKEN_REFRESH_BUFFER_MS } from "./constants.js";
+import { REQUEST_TIMEOUT_MS, TOKEN_REFRESH_BUFFER_MS } from "./constants.js";
 
 const CONFIG = await window.electronAPI.getSettings();
 
@@ -78,7 +78,7 @@ const createFetchRequest = async (method, url, options = {}) => {
     const response = await fetch(url, {
       method,
       headers: {
-        'Accept': 'application/json',
+        Accept: `application/json`,
         ...headers
       },
       signal: controller.signal
@@ -116,7 +116,7 @@ const createFetchRequest = async (method, url, options = {}) => {
   } catch (error) {
     clearTimeout(timeoutId);
     
-    if (error.name === 'AbortError') {
+    if (error.name === `AbortError`) {
       throw new Error(`Request timeout reached: ${REQUEST_TIMEOUT} ms.`);
     }
     
@@ -124,7 +124,7 @@ const createFetchRequest = async (method, url, options = {}) => {
       throw new Error(`You are currently offline. Please check your network connection.`);
     }
     
-    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+    if (error.message.includes(`Failed to fetch`) || error.message.includes(`NetworkError`)) {
       throw new Error(`The server is not responding. Check your nightscout site address.`);
     }
     
@@ -239,8 +239,8 @@ const fallbackGet = async (params, onSuccess, onError, endpoint) => {
   try {
     const data = await createFetchRequest(`GET`, url, {
       headers: {
-        'Authorization': `Bearer ${GetParams.TOKEN}`,
-        'Accept': 'application/json'
+        Authorization: `Bearer ${GetParams.TOKEN}`,
+        Accept: `application/json`
       },
       fallback: true
     });
@@ -283,7 +283,7 @@ const getData = async (onSuccess, onError) => {
   try {
     const data = await createFetchRequest(`GET`, url, {
       headers: {
-        'Authorization': `Bearer ${GetParams.TOKEN}`
+        Authorization: `Bearer ${GetParams.TOKEN}`
       }
     });
     
@@ -323,7 +323,7 @@ const getStatus = async (testParams, onSuccess, onError) => {
   try {
     const data = await createFetchRequest(`GET`, url, {
       headers: {
-        'Authorization': `Bearer ${GetParams.TOKEN}`
+        Authorization: `Bearer ${GetParams.TOKEN}`
       }
     });
     
