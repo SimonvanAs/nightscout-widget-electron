@@ -57,8 +57,8 @@ describe(`Backend Integration Tests`, () => {
     it(`should successfully fetch data from API v3`, async () => {
       const mockData = {
         result: [
-          { sgv: 120, direction: 'Flat', date: Date.now() },
-          { sgv: 115, direction: 'FortyFiveUp', date: Date.now() - 300000 }
+          { sgv: 120, direction: `Flat`, date: Date.now() },
+          { sgv: 115, direction: `FortyFiveUp`, date: Date.now() - 300000 }
         ]
       };
 
@@ -66,7 +66,7 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          token: 'jwt-token-abc123',
+          token: `jwt-token-abc123`,
           exp: Math.floor(Date.now() / 1000) + 3600
         })
       });
@@ -89,15 +89,15 @@ describe(`Backend Integration Tests`, () => {
 
     it(`should fallback to API v2 on 403 error`, async () => {
       const mockV2Data = [
-        { sgv: 120, direction: 'Flat', mills: Date.now() },
-        { sgv: 115, direction: 'FortyFiveUp', mills: Date.now() - 300000 }
+        { sgv: 120, direction: `Flat`, mills: Date.now() },
+        { sgv: 115, direction: `FortyFiveUp`, mills: Date.now() - 300000 }
       ];
 
       // Mock token response
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          token: 'jwt-token-abc123',
+          token: `jwt-token-abc123`,
           exp: Math.floor(Date.now() / 1000) + 3600
         })
       });
@@ -106,8 +106,8 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: false,
         status: 403,
-        statusText: 'Forbidden',
-        json: async () => ({ message: 'Forbidden' })
+        statusText: `Forbidden`,
+        json: async () => ({ message: `Forbidden` })
       });
 
       // V2 fallback succeeds
@@ -131,13 +131,13 @@ describe(`Backend Integration Tests`, () => {
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          token: 'jwt-token-abc123',
+          token: `jwt-token-abc123`,
           exp: Math.floor(Date.now() / 1000) + 3600
         })
       });
 
       // Data fetch fails
-      global.fetch.mockRejectedValueOnce(new Error('Failed to fetch'));
+      global.fetch.mockRejectedValueOnce(new Error(`Failed to fetch`));
 
       const onSuccess = jest.fn();
       const onError = jest.fn();
