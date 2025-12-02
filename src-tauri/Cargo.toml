@@ -1,0 +1,30 @@
+[package]
+name = "nightscout-widget-electron"
+version = "0.8.3"
+description = "An Electron widget application to show on a desktop sgv (sensor glucose value) is getting from Nightscout API"
+authors = ["Dmitry Burnyshev <dmitry.burnyshev@gmail.com>"]
+license = "AGPL-3.0"
+repository = "https://github.com/kashamalasha/nightscout-widget-electron"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0", features = [] }
+tauri-plugin-store = "2.0"
+tauri-plugin-dialog = "2.0"
+tauri-plugin-shell = "2.0"
+tauri-plugin-updater = "2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+log = "0.4"
+env_logger = "0.11"
+
+[features]
+# This feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
+

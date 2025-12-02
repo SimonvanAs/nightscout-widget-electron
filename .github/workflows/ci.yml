@@ -70,15 +70,15 @@ jobs:
 
       # ---- Lint (runs eslint) ----
       - name: Lint
-        run: npm run lint
+        run: npm run lint || (echo "Lint failed with exit code $?" && exit 1)
 
       # ---- Unit tests (Jest config exists in repo) ----
       - name: Test
-        run: npm test
+        run: npm test || (echo "Tests failed with exit code $?" && exit 1)
 
       # ---- Version check ----
       - name: Version Check
-        run: npm run version-check
+        run: npm run version-check || (echo "Version check failed with exit code $?" && exit 1)
 
       # ---- Build platform-specific artifacts with electron-builder ----
       # Building without publishing, matching your package.json build config
@@ -88,7 +88,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p dist
-          npx electron-builder --linux AppImage --publish never
+          echo "Starting Linux build..."
+          npx electron-builder --linux AppImage --publish never || (echo "Build failed with exit code $?" && exit 1)
+          echo "Build completed successfully"
           ls -la dist/ || echo "No dist files found"
 
       - name: Build (Windows)
@@ -97,7 +99,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if not exist dist mkdir dist
-          npx electron-builder --win nsis zip --publish never
+          echo "Starting Windows build..."
+          npx electron-builder --win nsis zip --publish never || (echo "Build failed with exit code %ERRORLEVEL%" && exit 1)
+          echo "Build completed successfully"
           dir dist\ || echo "No dist files found"
 
       - name: Build (macOS)
@@ -109,10 +113,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p dist
+          echo "Starting macOS build..."
           # Build for both Apple Silicon and Intel (universal) per package.json config
           # Since notarize is false, this builds unsigned DMG
           # Override hardenedRuntime for CI unsigned builds
-          npx electron-builder --mac dmg zip --publish never --config.mac.hardenedRuntime=false --config.mac.gatekeeperAssess=false
+          npx electron-builder --mac dmg zip --publish never --config.mac.hardenedRuntime=false --config.mac.gatekeeperAssess=false || (echo "Build failed with exit code $?" && exit 1)
+          echo "Build completed successfully"
           ls -la dist/ || echo "No dist files found"
 
       # ---- Upload artifacts from dist/ for download and testing ----

@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "NIGHTSCOUT": {
+      "type": "object",
+      "properties": {
+        "URL": {
+          "type": "string",
+          "minLength": 10,
+          "pattern": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
+        },
+        "TOKEN": {
+          "type": "string",
+          "minLength": 10
+        },
+        "INTERVAL": {
+          "type": "integer",
+          "default": 60
+        }
+      },
+      "required": [
+        "URL",
+        "TOKEN",
+        "INTERVAL"
+      ]
+    },
+    "BG": {
+      "type": "object",
+      "properties": {
+        "HIGH": {
+          "type": "number",
+          "minimum": 1,
+          "default": 10
+        },
+        "LOW": {
+          "type": "number",
+          "minimum": 1,
+          "default": 3.5
+        },
+        "TARGET": {
+          "type": "object",
+          "properties": {
+            "TOP": {
+              "type": "number",
+              "minimum": 1,
+              "default": 8
+            },
+            "BOTTOM": {
+              "type": "number",
+              "minimum": 1,
+              "default": 4
+            }
+          },
+          "required": [
+            "TOP",
+            "BOTTOM"
+          ]
+        }
+      },
+      "required": [
+        "HIGH",
+        "LOW",
+        "TARGET"
+      ]
+    },
+    "WIDGET": {
+      "type": "object",
+      "properties": {
+        "SHOW_AGE": {
+          "type": "boolean"
+        },
+        "AGE_LIMIT": {
+          "type": "integer",
+          "default": 20
+        },
+        "POSITION": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "default": 1000
+            },
+            "y": {
+              "type": "integer",
+              "default": 100
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ]
+        },
+        "UNITS_IN_MMOL": {
+          "type": "boolean",
+          "default": true
+        },
+        "CALC_TREND": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "AGE_LIMIT",
+        "POSITION",
+        "UNITS_IN_MMOL",
+        "CALC_TREND"
+      ]
+    },
+    "LAST_UPDATE_REQUEST": {
+      "type": "string",
+      "default": "1/1/2000"
+    },
+    "IS_FIRST_RUN": {
+      "type": "boolean",
+      "default": true
+    },
+    "LANGUAGE": {
+      "type": "string"
+    },
+    "JWT_EXPIRATION": {
+      "type": "integer",
+      "default": 946684800
+    }
+  },
+  "required": [
+    "NIGHTSCOUT",
+    "BG",
+    "WIDGET",
+    "LAST_UPDATE_REQUEST",
+    "IS_FIRST_RUN",
+    "LANGUAGE"
+  ],
+  "additionalProperties": false
+}

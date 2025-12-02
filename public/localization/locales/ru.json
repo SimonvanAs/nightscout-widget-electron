@@ -1,0 +1,32 @@
+{
+  "settings": {
+    "title": "Настройки виджета",
+    "nightscout": {
+      "title": "Настройки Nightscout API",
+      "url": "Nightscout адрес",
+      "token": "Nightscout токен",
+      "interval": "Частота запроса данных в Nightscout (сек.)"
+    },
+    "widget": {
+      "title": "Настройки отображения",
+      "age_limit": "Инфо: Нет данных (мин.)",
+      "show_age": "Время посл. замера",
+      "calc_trend": "Расчёт тренда",
+      "units_in_mmol": "Значения в mmol/l"
+    },
+    "bg": {
+      "title": "Настройки контроля уровня глюкозы",
+      "high": "Недопустимая гипергликемия",
+      "low": "Недопустимая гиппогликемия",
+      "target": {
+        "top": "Целевой уровень: верх",
+        "bottom": "Целевой уровень: низ"
+      }
+    },
+    "disabled_feature": "Функционал временно отключён",
+    "show_logs": "Логи ...",
+    "button-save": "Сохранить",
+    "button-test": "Тест",
+    "help_to_translate": "Помочь с переводом"
+  }
+}

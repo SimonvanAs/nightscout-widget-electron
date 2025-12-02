@@ -1,0 +1,7 @@
+/mnt/c/Users/s.vanas/nightscout-widget-electron/src-tauri/target/release/deps/stable_deref_trait-49146318628da66e.d: /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stable_deref_trait-1.2.1/src/lib.rs
+
+/mnt/c/Users/s.vanas/nightscout-widget-electron/src-tauri/target/release/deps/libstable_deref_trait-49146318628da66e.rlib: /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stable_deref_trait-1.2.1/src/lib.rs
+
+/mnt/c/Users/s.vanas/nightscout-widget-electron/src-tauri/target/release/deps/libstable_deref_trait-49146318628da66e.rmeta: /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stable_deref_trait-1.2.1/src/lib.rs
+
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/stable_deref_trait-1.2.1/src/lib.rs:
